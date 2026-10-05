@@ -18,6 +18,15 @@ import SavedJobs from './pages/candidate/SavedJobs';
 import Interviews from './pages/candidate/Interviews';
 import CandidateProfilePage from './pages/candidate/CandidateProfile';
 
+// Recruiter Pages
+import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
+import CompanyProfilePage from './pages/recruiter/CompanyProfile';
+import ManageJobs from './pages/recruiter/ManageJobs';
+import CreateJob from './pages/recruiter/CreateJob';
+import EditJob from './pages/recruiter/EditJob';
+import Applicants from './pages/recruiter/Applicants';
+import InterviewManagement from './pages/recruiter/InterviewManagement';
+
 function App() {
   return (
     <Router>
@@ -69,6 +78,64 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['CANDIDATE']}>
                   <CandidateProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Recruiter Protected Routes */}
+            <Route
+              path="/recruiter/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <RecruiterDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/company"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <CompanyProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/jobs"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <ManageJobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/jobs/create"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <CreateJob />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/jobs/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <EditJob />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/jobs/:jobId/applicants"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <Applicants />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/interviews"
+              element={
+                <ProtectedRoute allowedRoles={['RECRUITER']}>
+                  <InterviewManagement />
                 </ProtectedRoute>
               }
             />
