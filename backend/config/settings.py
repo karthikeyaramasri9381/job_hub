@@ -37,7 +37,18 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+
+    # Local apps
+    'accounts',
+    'companies',
+    'profiles',
+    'jobs',
+    'applications',
+    'interviews',
+    'common',
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
