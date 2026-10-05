@@ -7,12 +7,14 @@ from .views import (
     ExperienceDetailView,
     CandidateSkillListCreateView,
     CandidateSkillDetailView,
-    RecruiterProfileView
+    RecruiterProfileView,
+    ResumeUploadAPIView
 )
 
 urlpatterns = [
     # Candidate Profile & Nested Items
     path('candidate/profile/', CandidateProfileView.as_view(), name='candidate_profile'),
+    path('candidate/upload-resume/', ResumeUploadAPIView.as_view(), name='candidate_upload_resume'),
     path('candidate/education/', EducationListCreateView.as_view(), name='candidate_education_list'),
     path('candidate/education/<int:pk>/', EducationDetailView.as_view(), name='candidate_education_detail'),
     path('candidate/experience/', ExperienceListCreateView.as_view(), name='candidate_experience_list'),

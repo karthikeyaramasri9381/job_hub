@@ -11,6 +11,17 @@ export const candidateService = {
     return response.data;
   },
 
+  uploadResume: async (file) => {
+    const formData = new FormData();
+    formData.append('resume', file);
+    const response = await api.post('/candidate/upload-resume/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   getEducation: async () => {
     const response = await api.get('/candidate/education/');
     return response.data;

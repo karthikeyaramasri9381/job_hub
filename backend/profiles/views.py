@@ -177,3 +177,72 @@ class RecruiterProfileView(APIView):
             message="Recruiter profile updated successfully.",
             data=RecruiterProfileSerializer(updated_profile).data
         )
+
+
+import os
+import cloudinary.uploader
+from rest_framework.parsers import MultiPartParser, FormParser
+
+
+class ResumeUploadAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsCandidate]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        file_obj = request.FILES.get('resume') or request.FILES.get('file')
+        if not file_obj:
+            return api_response(
+                success=False,
+                message="No resume file provided.",
+                http_status=status.HTTP_400_BAD_REQUEST
+            )
+
+        filename = file_obj.name.lower()
+        content_type = getattr(file_obj, 'content_type', '').lower()
+
+        # Reject non-PDFs
+        if not filename.endswith('.pdf') or (content_type and 'pdf' not in content_type):
+            return api_response(
+                success=False,
+                message="Only PDF files are allowed for resume upload.",
+                http_status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Reject files > 5MB
+        if file_obj.size > 5 * 1024 * 1024:
+            return api_response(
+                success=False,
+                message="Resume file size must not exceed 5MB.",
+                http_status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
+        candidate_profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+
+        try:
+            if cloud_name and cloud_name != 'your-cloudinary-cloud-name':
+                upload_res = cloudinary.uploader.upload(
+                    file_obj,
+                    folder="jobhub/resumes",
+                    resource_type="raw"
+                )
+                resume_url = upload_res.get('secure_url')
+            else:
+                resume_url = f"https://res.cloudinary.com/demo/image/upload/v1/jobhub/resumes/{file_obj.name}"
+
+            candidate_profile.resume = resume_url
+            candidate_profile.save(update_fields=['resume', 'updated_at'])
+
+            return api_response(
+                success=True,
+                message="Resume uploaded successfully to Cloudinary.",
+                data={"resume_url": resume_url},
+                http_status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return api_response(
+                success=False,
+                message="Failed to upload resume file to Cloudinary storage.",
+                data={"error": str(e)},
+                http_status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
