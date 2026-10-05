@@ -4,20 +4,11 @@ import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
+import Home from './pages/public/Home';
+import Jobs from './pages/public/Jobs';
+import JobDetails from './pages/public/JobDetails';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-
-// Temporary placeholder homepage
-const HomePlaceholder = () => (
-  <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a' }}>
-      Find the right opportunity for your future.
-    </h1>
-    <p style={{ color: '#475569', fontSize: '1.2rem', marginTop: '12px' }}>
-      Connecting top software engineers & recruiters on JobHub.
-    </p>
-  </div>
-);
 
 function App() {
   return (
@@ -25,7 +16,12 @@ function App() {
       <AuthProvider>
         <Layout>
           <Routes>
-            <Route path="/" element={<HomePlaceholder />} />
+            {/* Public Pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
+
+            {/* Auth Pages */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
