@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 from accounts.models import User
 from companies.models import Company
 from profiles.models import RecruiterProfile, CandidateProfile
-from jobs.models import Job
+from jobs.models import Job, SavedJob
 
 
 class JobAPITests(TestCase):
@@ -107,3 +107,36 @@ class JobAPITests(TestCase):
         url = reverse('recruiter_job_detail', kwargs={'pk': job_a.pk})
         response = self.client.put(url, {"title": "Hacked Title", "description": "Hacked", "location": "Remote"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_candidate_save_and_unsave_job(self):
+        job = Job.objects.create(
+            company=self.company_a,
+            created_by=self.recruiter_a,
+            title="Frontend Developer",
+            description="React JS job",
+            location="Remote",
+            status=Job.Status.PUBLISHED
+        )
+
+        self.client.force_authenticate(user=self.candidate)
+        save_url = reverse('toggle_save_job', kwargs={'pk': job.pk})
+
+        # Save Job
+        res_save = self.client.post(save_url)
+        self.assertEqual(res_save.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(SavedJob.objects.filter(candidate=self.candidate_profile, job=job).exists())
+
+        # Duplicate Save (Idempotent)
+        res_dup = self.client.post(save_url)
+        self.assertEqual(res_dup.status_code, status.HTTP_200_OK)
+
+        # List Saved Jobs
+        saved_list_url = reverse('candidate_saved_jobs')
+        res_list = self.client.get(saved_list_url)
+        self.assertEqual(res_list.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_list.data['data']), 1)
+
+        # Unsave Job
+        res_unsave = self.client.delete(save_url)
+        self.assertEqual(res_unsave.status_code, status.HTTP_200_OK)
+        self.assertFalse(SavedJob.objects.filter(candidate=self.candidate_profile, job=job).exists())

@@ -4,9 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from .models import Job
-from .serializers import JobSerializer, JobCreateUpdateSerializer
-from common.permissions import IsRecruiter, IsRecruiterJobOwner
+from .models import Job, SavedJob
+from .serializers import JobSerializer, JobCreateUpdateSerializer, SavedJobSerializer
+from profiles.models import CandidateProfile
+from common.permissions import IsCandidate, IsRecruiter, IsRecruiterJobOwner
 from common.utils import api_response
 
 
@@ -218,4 +219,62 @@ class RecruiterJobCloseView(APIView):
             success=True,
             message="Job closed successfully.",
             data=JobSerializer(job, context={'request': request}).data
+        )
+
+
+class ToggleSaveJobAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsCandidate]
+
+    def post(self, request, pk):
+        try:
+            job = Job.objects.get(pk=pk, status=Job.Status.PUBLISHED)
+        except Job.DoesNotExist:
+            return api_response(
+                success=False,
+                message="Job not found.",
+                http_status=status.HTTP_404_NOT_FOUND
+            )
+
+        candidate_profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        saved_job, created = SavedJob.objects.get_or_create(candidate=candidate_profile, job=job)
+
+        return api_response(
+            success=True,
+            message="Job saved successfully." if created else "Job is already saved.",
+            data={"is_saved": True, "saved_job_id": saved_job.id},
+            http_status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+    def delete(self, request, pk):
+        try:
+            candidate_profile = CandidateProfile.objects.get(user=request.user)
+            saved_job = SavedJob.objects.get(candidate=candidate_profile, job_id=pk)
+            saved_job.delete()
+            return api_response(
+                success=True,
+                message="Job unsaved successfully.",
+                data={"is_saved": False}
+            )
+        except (CandidateProfile.DoesNotExist, SavedJob.DoesNotExist):
+            return api_response(
+                success=False,
+                message="Saved job record not found.",
+                http_status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class CandidateSavedJobsListAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsCandidate]
+    serializer_class = SavedJobSerializer
+
+    def get_queryset(self):
+        return SavedJob.objects.filter(candidate__user=self.request.user).select_related('job', 'job__company').order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return api_response(
+            success=True,
+            message="Saved jobs retrieved successfully.",
+            data=serializer.data
         )

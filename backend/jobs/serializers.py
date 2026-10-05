@@ -85,3 +85,12 @@ class JobCreateUpdateSerializer(serializers.ModelSerializer):
             instance.skills.set(skills)
 
         return instance
+
+
+class SavedJobSerializer(serializers.ModelSerializer):
+    job_details = JobSerializer(source='job', read_only=True)
+
+    class Meta:
+        model = SavedJob
+        fields = ('id', 'candidate', 'job', 'job_details', 'created_at')
+        read_only_fields = ('id', 'candidate', 'created_at')

@@ -5,13 +5,19 @@ from .views import (
     RecruiterJobListCreateView,
     RecruiterJobDetailView,
     RecruiterJobPublishView,
-    RecruiterJobCloseView
+    RecruiterJobCloseView,
+    ToggleSaveJobAPIView,
+    CandidateSavedJobsListAPIView
 )
 
 urlpatterns = [
     # Public Job APIs
     path('jobs/', PublicJobListAPIView.as_view(), name='public_job_list'),
     path('jobs/<int:pk>/', PublicJobDetailAPIView.as_view(), name='public_job_detail'),
+
+    # Saved Job APIs
+    path('jobs/<int:pk>/save/', ToggleSaveJobAPIView.as_view(), name='toggle_save_job'),
+    path('candidate/saved-jobs/', CandidateSavedJobsListAPIView.as_view(), name='candidate_saved_jobs'),
 
     # Recruiter Job Management APIs
     path('recruiter/jobs/', RecruiterJobListCreateView.as_view(), name='recruiter_job_list_create'),
