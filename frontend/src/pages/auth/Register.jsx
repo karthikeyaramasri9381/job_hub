@@ -42,10 +42,13 @@ const Register = () => {
       }
     } catch (err) {
       const errData = err.response?.data;
-      if (errData?.data?.email) {
-        setError(errData.data.email[0]);
+      if (errData?.data && typeof errData.data === 'object') {
+        const firstKey = Object.keys(errData.data)[0];
+        const firstVal = errData.data[firstKey];
+        const msg = Array.isArray(firstVal) ? firstVal[0] : firstVal;
+        setError(`${firstKey.replace('_', ' ')}: ${msg}`);
       } else {
-        setError(errData?.message || 'Registration failed. Please check input fields.');
+        setError(errData?.message || err.message || 'Registration failed. Please check input fields.');
       }
     } finally {
       setLoading(false);
