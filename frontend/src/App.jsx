@@ -27,6 +27,9 @@ import EditJob from './pages/recruiter/EditJob';
 import Applicants from './pages/recruiter/Applicants';
 import InterviewManagement from './pages/recruiter/InterviewManagement';
 
+// Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+
 function App() {
   return (
     <Router>
@@ -136,6 +139,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['RECRUITER']}>
                   <InterviewManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Protected Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />
