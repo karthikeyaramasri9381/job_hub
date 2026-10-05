@@ -72,3 +72,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField(required=True)
+    role = serializers.ChoiceField(
+        choices=[User.Role.CANDIDATE, User.Role.RECRUITER],
+        default=User.Role.CANDIDATE,
+        required=False
+    )
